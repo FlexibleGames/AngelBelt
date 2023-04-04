@@ -1,0 +1,10 @@
+{
+  "type": "code",
+  "modid": "angelbelt",
+  "name": "Angel Belt",
+  "authors": [ "Flexible Games" ],
+  "description": "Adds a craftable belt that gifts flight.",
+  "website": "https://www.youtube.com/c/FlexibleGames",  
+  "version": "1.3.0",
+  "dependency": {}
+}
