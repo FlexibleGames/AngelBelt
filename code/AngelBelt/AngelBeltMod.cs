@@ -36,7 +36,7 @@ namespace AngelBelt
         public bool IsShuttingDown { get; set; }
 
         // server stuff
-        private ICoreServerAPI sapi;        
+        private ICoreServerAPI sapi;
 
         public override bool ShouldLoad(EnumAppSide forSide)
         {
@@ -143,6 +143,7 @@ namespace AngelBelt
                     Mod.Logger.VerboseDebug("AngelBelt: Error Parsing Axis Log String. : " + bt.savedaxis);
                 }
                 player.WorldData.FreeMovePlaneLock = axisLock;
+                player.WorldData.EntityControls.FlyPlaneLock = axisLock;                 
                 ((IServerPlayer)player).BroadcastPlayerData();
                 return true;
             }
@@ -203,7 +204,7 @@ namespace AngelBelt
                     default: break;
                 }
                 this.SavedAxis = newaxis;
-                //capi.World.Player.WorldData.FreeMovePlaneLock = newaxis;                
+                capi.World.Player.WorldData.FreeMovePlaneLock = newaxis;
                 BeltToggle beltToggle = new BeltToggle()
                 {
                     toggle = "updateflight",
