@@ -21,6 +21,9 @@ If you want to add a feature or fix a bug, please create a pull request addressi
 
 Issues can be posted on the issue tracker.
 
+# v1.5
+- Update to Game version 1.19 and migrated the project to .NET 7
+
 ## Support?
 If you want to support me on any of my projects, please consider being a patron.
 It can take many many hours to finish a mod, keep it updated, and fix any bugs found by users. Please consider supporting the authors of your favorite mods.
