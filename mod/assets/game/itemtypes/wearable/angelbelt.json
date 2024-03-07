@@ -1,60 +1,64 @@
 {
-	code: "angelbelt",
-	class: "AngelBelt",
-	variantgroups: [		
-		{ code: "type", states: ["off", "on"] }
+	"code": "angelbelt",
+	"class": "AngelBelt",
+	"variantgroups": [		
+		{ "code": "type", "states": ["off", "on"] }
 	],	
-	shape: { base: "game:entity/humanoid/seraph/clothing/waist/angelbelt" },
-	storageFlags: 128,
-	attributesByType: {
+	"shape": { "base": "game:entity/humanoid/seraph/clothing/waist/angelbelt" },
+	"storageFlags": 128,
+	"attributesByType": {
 		"*-off":{ 
-					wearableAttachment: true,
-					clothescategory: "waist",		
-					beltActive: false
+					"wearableAttachment": true,
+					"clothescategory": "waist",		
+					"beltActive": false
 		},
 		"*-on":{
-					wearableAttachment: true,
-					clothescategory: "waist",			
-					beltActive: true					
+					"wearableAttachment": true,
+					"clothescategory": "waist",			
+					"beltActive": true					
 		},
 		"*": {
-			wearableAttachment: true,
-			clothescategory: "waist",
-			handbook: {
-				excludeByType: {
+			"wearableAttachment": true,
+			"clothescategory": "waist",
+			"handbook": {
+				"excludeByType": {
 					"*-on": true								
 				}
 			}
 		}
 	},	
-	textures: {
-		"seraph": { base: "block/transparent" },
-		"angelbelt" : { base: "game:entity/humanoid/seraphclothes/waist/angelbelt-{type}" }		
+	"lightHsvByType": { 
+		"*-on": [ 9, 3, 28 ],
+		"*-off": [ 9, 3, 20 ]
 	},
-	creativeinventory: { "general": ["*"], "items": ["*"], "clothing": ["*"] },
-	renderAlphaTest: 0.25,
-	fpHandTransform: {
-		translation: { x: 0.6, y: -1.5, z: -1.3 },
-		rotation: { x: 42, y: 100, z: -9 },
-		scale: 3.06
+	"textures": {
+		"seraph": { "base": "block/transparent" },
+		"angelbelt" : { "base": "game:entity/humanoid/seraphclothes/waist/angelbelt-{type}" }		
 	},
-	tpHandTransform: {
-		translation: { x: -0.9, y: -1.15, z: -1.25 },
-		rotation: { x: 26, y: -91, z: 49 },
-		scale: 0.55
+	"creativeinventory": { "general": ["*"], "items": ["*"], "clothing": ["*"] },
+	"renderAlphaTest": 0.25,
+	"fpHandTransform": {
+		"translation": { "x": 0.6, "y": -1.5, "z": -1.3 },
+		"rotation": { "x": 42, "y": 100, "z": -9 },
+		"scale": 3.06
 	},
-	guiTransformByType: {
+	"tpHandTransform": {
+		"translation": { "x": -0.9, "y": -1.15, "z": -1.25 },
+		"rotation": { "x": 26, "y": -91, "z": 49 },
+		"scale": 0.55
+	},
+	"guiTransformByType": {
 		"*": {
-			translation: { x: 0, y: 0, z: 19 },
-			rotation: { x: 174, y: -45, z: 23 },
-			origin: { x: 0.4, y: 1.1, z: 0.4 },
-			scale: 2.85
+			"translation": { "x": 0, "y": 0, "z": 19 },
+			"rotation": { "x": 174, "y": -45, "z": 23 },
+			"origin": { "x": 0.4, "y": 1.1, "z": 0.4 },
+			"scale": 2.85
 		}
 	},
-	groundTransform: {
-		translation: { x: 0.05, y: -0.21, z: 0 },
-		rotation: { x: 0, y: 0, z: 0 },
-		origin: { x: 0.5, y: 0.5, z: 0.5299 },
-		scale: 2.72
+	"groundTransform": {
+		"translation": { "x": 0.05, "y": -0.21, "z": 0 },
+		"rotation": { "x": 0, "y": 0, "z": 0 },
+		"origin": { "x": 0.5, "y": 0.5, "z": 0.5299 },
+		"scale": 2.72
 	}
 }
