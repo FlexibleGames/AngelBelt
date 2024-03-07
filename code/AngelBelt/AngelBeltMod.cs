@@ -158,7 +158,7 @@ namespace AngelBelt
                 waistSlot.MarkDirty();
                 player.WorldData.FreeMove = true;
                 player.Entity.Properties.FallDamageMultiplier = 0f;
-                //player.Entity.Properties.FallDamage = false;
+                //player.Entity.Properties.FallDamage = false; value now obsolete
                 api.World.PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"), player);
                 player.WorldData.MoveSpeedMultiplier = bt.savedspeed;
                 player.WorldData.EntityControls.MovespeedMultiplier = bt.savedspeed;
@@ -179,7 +179,8 @@ namespace AngelBelt
                 waistSlot.MarkDirty();
                 player.Entity.PositionBeforeFalling = player.Entity.Pos.XYZ;
                 player.WorldData.FreeMove = false;
-                player.Entity.Properties.FallDamage = true;
+                //player.Entity.Properties.FallDamage = true; value now obsolete
+                player.Entity.Properties.FallDamageMultiplier = 1.0f;
                 api.World.PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"), player);
                 player.WorldData.MoveSpeedMultiplier = 1f;
                 player.WorldData.EntityControls.MovespeedMultiplier = 1f;
