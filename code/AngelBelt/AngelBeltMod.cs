@@ -157,7 +157,8 @@ namespace AngelBelt
                 waistSlot.Itemstack = swapStack;
                 waistSlot.MarkDirty();
                 player.WorldData.FreeMove = true;
-                player.Entity.Properties.FallDamage = false;
+                player.Entity.Properties.FallDamageMultiplier = 0f;
+                //player.Entity.Properties.FallDamage = false;
                 api.World.PlaySoundAt(new AssetLocation("game:sounds/effect/translocate-breakdimension"), player);
                 player.WorldData.MoveSpeedMultiplier = bt.savedspeed;
                 player.WorldData.EntityControls.MovespeedMultiplier = bt.savedspeed;
