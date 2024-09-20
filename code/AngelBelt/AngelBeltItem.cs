@@ -13,8 +13,11 @@ namespace AngelBelt
     {
         public EnumCharacterDressType DressType { get; private set; }
 
-        public bool IsArmor = false;        
-       
+        public bool IsArmor = false;                
+
+        public bool UseCharge => Attributes != null ? base.Attributes["usecharge"].AsBool(false) : false;
+        public int ChargePerSecond => Attributes != null ? base.Attributes["chargepersecond"].AsInt(1) : 1;
+
         public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
         {
 //            handling = EnumHandHandling.Handled;
@@ -42,20 +45,6 @@ namespace AngelBelt
             }
         }
 
-        public override void OnHeldIdle(ItemSlot slot, EntityAgent byEntity)
-        {
-            if (!slot.Itemstack.Attributes.GetBool("beltActive"))
-            {
-                EntityPlayer entityPlayer = byEntity as EntityPlayer;
-                IPlayer player = (byEntity != null) ? entityPlayer.Player : null;
-                if (player == null)
-                    return;
-                player.WorldData.FreeMove = false;
-                player.Entity.Properties.FallDamage = true;
-            }
-            base.OnHeldIdle(slot, byEntity);
-        }
-
         public override void OnBeforeRender(ICoreClientAPI capi, ItemStack itemstack, EnumItemRenderTarget target, ref ItemRenderInfo renderinfo)
         {
             JsonObject attributes = itemstack.Collectible.Attributes;
@@ -79,7 +68,7 @@ namespace AngelBelt
         {
             base.OnLoaded(api);
 
-            string value = this.Attributes["clothscategory"].AsString(null);
+            string value = base.Attributes["clothescategory"].AsString("waist");
             EnumCharacterDressType dresstype = EnumCharacterDressType.Unknown;
             Enum.TryParse<EnumCharacterDressType>(value, true, out dresstype);
             this.DressType = dresstype;

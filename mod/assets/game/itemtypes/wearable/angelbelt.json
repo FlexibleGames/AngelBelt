@@ -1,39 +1,34 @@
 {
 	"code": "angelbelt",
 	"class": "AngelBelt",
-	"variantgroups": [		
+	"variantgroups": [
 		{ "code": "type", "states": ["off", "on"] }
-	],	
+	],
 	"shape": { "base": "game:entity/humanoid/seraph/clothing/waist/angelbelt" },
 	"storageFlags": 128,
-	"attributesByType": {
-		"*-off":{ 
-					"wearableAttachment": true,
-					"clothescategory": "waist",		
-					"beltActive": false
-		},
-		"*-on":{
-					"wearableAttachment": true,
-					"clothescategory": "waist",			
-					"beltActive": true					
-		},
-		"*": {
-			"wearableAttachment": true,
-			"clothescategory": "waist",
-			"handbook": {
-				"excludeByType": {
-					"*-on": true								
-				}
+	"attributes": {
+		"wearableAttachment": true,
+		"clothescategory": "waist",
+		"chargable": true,
+		"usecharge": true,
+		"chargepersecond": 1,
+		"handbook": {
+			"excludeByType": {
+				"*-on": true,
+				"*-off": false
 			}
 		}
-	},	
-	"lightHsvByType": { 
+	},
+	"durability": 3600,
+	"lightHsvByType": {
 		"*-on": [ 9, 3, 28 ],
 		"*-off": [ 9, 3, 20 ]
 	},
-	"textures": {
-		"seraph": { "base": "block/transparent" },
-		"angelbelt" : { "base": "game:entity/humanoid/seraphclothes/waist/angelbelt-{type}" }		
+	"texturesByType": {
+		"*": {
+			"seraph": { "base": "game:block/transparent" },
+			"angelbelt" : { "base": "game:entity/humanoid/seraphclothes/waist/angelbelt-{type}" }
+		}
 	},
 	"creativeinventory": { "general": ["*"], "items": ["*"], "clothing": ["*"] },
 	"renderAlphaTest": 0.25,

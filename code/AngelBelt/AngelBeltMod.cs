@@ -3,6 +3,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Client;
 using Vintagestory.API.Server;
 using Vintagestory.API.Config;
+using System.Collections.Generic;
 
 
 namespace AngelBelt
@@ -29,6 +30,11 @@ namespace AngelBelt
 
         private float SavedSpeedMult = 1f;
         private EnumFreeMovAxisLock SavedAxis = EnumFreeMovAxisLock.None;
+
+        private List<string> _flyingPlayers = new List<string>();
+        private long _eventID = 0;
+
+        private bool _useCharge = false;
 
         // client stuff
         private ICoreClientAPI capi;        
@@ -68,7 +74,13 @@ namespace AngelBelt
             serverChannel = sapi.Network.RegisterChannel("angelbelt").RegisterMessageType(typeof
                 (BeltToggle)).RegisterMessageType(typeof(BeltResponse)).SetMessageHandler<BeltToggle>(new
                 NetworkClientMessageHandler<BeltToggle>(this.OnClientSent));
-            sapi.Event.SaveGameLoaded += GetVariants;
+            sapi.Event.SaveGameLoaded += GetVariants;            
+        }
+
+        public override void Dispose()
+        {
+            if (_eventID != 0 && sapi != null) sapi.Event.UnregisterGameTickListener(_eventID);
+            _eventID = 0;
         }
 
         private void GetVariants()
@@ -78,15 +90,89 @@ namespace AngelBelt
 
             ItemEnabledFlight = sapi.World.GetItem(onitemcode);
             ItemDisabledFlight = sapi.World.GetItem(offitemcode);
+            if ((ItemEnabledFlight as AngelBeltItem).UseCharge)
+            {
+                _useCharge = true;
+                _eventID = sapi.Event.RegisterGameTickListener(new Action<float>(OnSimTick), 1000, 1000);
+            }
             sapi.World.Logger.StoryEvent(Lang.Get("Flying Free as a bird...", Array.Empty<object>()));
+        }
+
+        public void OnSimTick(float dt)
+        {
+            // this is only run on the server
+            if (_flyingPlayers.Count == 0) return;
+            bool validateplayers = false;
+            List<string> invalidplayers = new List<string>();
+            foreach (string playerid in _flyingPlayers)
+            {
+                IServerPlayer player = sapi.World.PlayerByUid(playerid) as IServerPlayer;
+                if (player == null || player.ConnectionState != EnumClientState.Playing) 
+                { 
+                    validateplayers = true;
+                    invalidplayers.Add(playerid);
+                    continue; 
+                }
+                // we have a flying player to edit
+                ItemStack belt = player.InventoryManager.GetOwnInventory("character")[(int)EnumCharacterDressType.Waist].Itemstack;
+                if (belt != null && belt.Collectible is AngelBeltItem abi)
+                {
+                    int curcharge = belt.Collectible.GetRemainingDurability(belt);
+                    if (curcharge == 1)
+                    {
+                        // disable belt
+                        BeltToggle beltToggle = new BeltToggle()
+                        {
+                            toggle = playerid,
+                            savedspeed = 1.0f,
+                            savedaxis = "None"
+                        };
+                        Toggle(player, beltToggle);
+                        api.World.PlaySoundAt(new AssetLocation("game:sounds/effect/stonecrush"), player);
+                        validateplayers = true;
+                        invalidplayers.Add(playerid);
+                        continue;
+                    }
+                    int movesquared = Math.Max((int)player.WorldData.MoveSpeedMultiplier, (int)player.WorldData.EntityControls.MovespeedMultiplier);
+                    movesquared *= movesquared;
+                    int movecost = abi.ChargePerSecond * movesquared;
+                    if (curcharge < movecost)
+                    {
+                        // disable belt
+                        BeltToggle beltToggle = new BeltToggle()
+                        {
+                            toggle = playerid,
+                            savedspeed = 1.0f,
+                            savedaxis = "None"
+                        };
+                        Toggle(player, beltToggle);
+                        api.World.PlaySoundAt(new AssetLocation("game:sounds/effect/stonecrush"), player);
+                        validateplayers = true;
+                        invalidplayers.Add(playerid);
+                    }
+                    else
+                    {
+                        curcharge -= movecost;
+                        if (curcharge < 1) curcharge = 1;
+                        belt.Attributes.SetInt("durability", curcharge);
+                        player.InventoryManager.GetOwnInventory("character")[(int)EnumCharacterDressType.Waist].MarkDirty();
+                    }
+                }                
+            }
+            if (validateplayers)
+            {
+                foreach (string invalidplayer in invalidplayers)
+                {
+                    _flyingPlayers.Remove(invalidplayer);
+                }
+            }
         }
 
         // server recieves this from client
         private void OnClientSent(IPlayer fromPlayer, BeltToggle bt)
         {
             if (fromPlayer == null || bt == null)
-                return;
-
+                return;            
             // do stuff here BeltToggle object includes the player who sent the message
             bool successful = Toggle(fromPlayer, bt);
             BeltResponse bres = new BeltResponse();
@@ -112,7 +198,22 @@ namespace AngelBelt
             }
             else if (response.response == "fail")
             {
-                capi.ShowChatMessage("AngelBelt Toggle failed!");
+                ItemStack belt = capi.World.Player.InventoryManager.GetOwnInventory("character")[(int)EnumCharacterDressType.Waist]?.Itemstack;
+                if (belt != null && (belt.Collectible as AngelBeltItem).UseCharge)
+                {
+                    int charge = belt.Collectible.GetRemainingDurability(belt);
+                    int movecost = ((int)capi.World.Player.Entity.Controls.MovespeedMultiplier);
+                    movecost *= movecost;
+                    movecost *= belt.Collectible.Attributes["chargepersecond"].AsInt(1);
+                    if (charge <= 1 || charge < movecost)
+                    {
+                        capi.ShowChatMessage(Lang.Get("needscharging"));
+                    }
+                }
+                else
+                {
+                    capi.ShowChatMessage("AngelBelt Toggle failed!");
+                }
             }
             else
             {
@@ -135,6 +236,7 @@ namespace AngelBelt
             {
                 // only change flight speed/axis, do not toggle on/off and only if the belt is on
                 // client should not send packet if the belt is off or isn't present
+                
                 player.WorldData.MoveSpeedMultiplier = bt.savedspeed;
                 player.WorldData.EntityControls.MovespeedMultiplier = bt.savedspeed;
                 EnumFreeMovAxisLock axisLock = EnumFreeMovAxisLock.None;
@@ -143,7 +245,7 @@ namespace AngelBelt
                     Mod.Logger.VerboseDebug("AngelBelt: Error Parsing Axis Log String. : " + bt.savedaxis);
                 }
                 player.WorldData.FreeMovePlaneLock = axisLock;
-                player.WorldData.EntityControls.FlyPlaneLock = axisLock;                 
+                player.WorldData.EntityControls.FlyPlaneLock = axisLock;
                 ((IServerPlayer)player).BroadcastPlayerData();
                 return true;
             }
@@ -152,8 +254,21 @@ namespace AngelBelt
             // we've already checked the players waist slot, so we know we're good.
             if (waistSlot.Itemstack.Item.LastCodePart() == "off")
             {
-                // belt is off, we need to enable it.
+                // validate IF we have 'charge' left if charge is enabled...
                 swapStack = new ItemStack(ItemEnabledFlight);
+                
+                if (_useCharge)
+                {
+                    int curcharge = waistSlot.Itemstack.Collectible.GetRemainingDurability(waistSlot.Itemstack);
+                    int movecost = (int)bt.savedspeed * (int)bt.savedspeed;
+                    movecost = movecost * swapStack.Collectible.Attributes["chargepersecond"].AsInt(1);
+                    if (curcharge <= 1 || curcharge < movecost)
+                    {
+                        return false; 
+                    }
+                    swapStack.Attributes.SetInt("durability", curcharge);
+                }
+                // belt is off, we need to enable it.
                 waistSlot.Itemstack = swapStack;
                 waistSlot.MarkDirty();
                 player.WorldData.FreeMove = true;
@@ -168,6 +283,7 @@ namespace AngelBelt
                     Mod.Logger.VerboseDebug("AngelBelt: Error Parsing Axis Lock string! : " + bt.savedaxis);
                 }
                 player.WorldData.FreeMovePlaneLock = axislock;
+                if (_useCharge) _flyingPlayers.Add(player.PlayerUID);
                 ((IServerPlayer)player).BroadcastPlayerData();
 
             }
@@ -175,6 +291,11 @@ namespace AngelBelt
             {
                 // belt is on, we need to disable it.
                 swapStack = new ItemStack(ItemDisabledFlight);
+                if (_useCharge)
+                {
+                    int curcharge = waistSlot.Itemstack.Collectible.GetRemainingDurability(waistSlot.Itemstack);
+                    swapStack.Attributes.SetInt("durability", curcharge);
+                }
                 waistSlot.Itemstack = swapStack;
                 waistSlot.MarkDirty();
                 player.Entity.PositionBeforeFalling = player.Entity.Pos.XYZ;
@@ -185,6 +306,7 @@ namespace AngelBelt
                 player.WorldData.MoveSpeedMultiplier = 1f;
                 player.WorldData.EntityControls.MovespeedMultiplier = 1f;
                 player.WorldData.FreeMovePlaneLock = EnumFreeMovAxisLock.None;
+                if (_useCharge && _flyingPlayers.Contains(player.PlayerUID)) _flyingPlayers.Remove(player.PlayerUID);
                 ((IServerPlayer)player).BroadcastPlayerData();
             }
                 

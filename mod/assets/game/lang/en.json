@@ -1,5 +1,5 @@
 {
-	"item-angelbelt-on": "Angel Belt On",
-	"item-angelbelt-off": "Angel Belt",	
-	"item-angelbelt-flight": "Angel Belt (Flight On))"
+	"item-angelbelt-*": "Angel Belt",
+	"itemdesc-angelbelt-*": "A wearable belt that when toggled, allows creative-mode flight. Optionally requires charging, see JSON attributes for more. Flight hotkeys are customizable in the controls settings menu.",	
+	"needscharging": "AngelBelt needs charging!"
 }
