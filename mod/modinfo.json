@@ -3,8 +3,8 @@
   "modid": "angelbelt",
   "name": "Angel Belt",
   "authors": [ "Flexible Games" ],
-  "description": "Adds a craftable belt that gifts flight.",
+  "description": "Adds a craftable belt that gifts flight. Optional Charge/Durability use.",
   "website": "https://www.youtube.com/c/FlexibleGames",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "dependency": {}
 }

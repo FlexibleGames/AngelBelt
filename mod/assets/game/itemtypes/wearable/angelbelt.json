@@ -9,9 +9,6 @@
 	"attributes": {
 		"wearableAttachment": true,
 		"clothescategory": "waist",
-		"chargable": true,
-		"usecharge": true,
-		"chargepersecond": 1,
 		"handbook": {
 			"excludeByType": {
 				"*-on": true,

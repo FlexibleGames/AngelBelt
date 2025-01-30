@@ -14,5 +14,6 @@ namespace AngelBelt
     public class BeltResponse
     {
         public string response;
+        public int charge;
     }
 }
